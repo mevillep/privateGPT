@@ -5,6 +5,11 @@ Built with [LangChain](https://github.com/hwchase17/langchain), [GPT4All](https:
 
 <img width="902" alt="demo" src="https://user-images.githubusercontent.com/721666/236942256-985801c9-25b9-48ef-80be-3acbb4575164.png">
 
+# prompt
+tell me high level functionalities that is achieved. for each point write purpose, why and technology/library used to achineve the task
+
+
+
 # Environment Setup
 In order to set your environment up to run the code here, first install all requirements:
 

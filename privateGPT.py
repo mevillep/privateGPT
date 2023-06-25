@@ -87,3 +87,40 @@ def parse_arguments():
 
 if __name__ == "__main__":
     main()
+
+
+# Interactive Question-Answering (QA):
+
+# Purpose: Allows users to input queries and receive answers based on the documents.
+# Why: Enables interactive exploration and retrieval of information from the document collection.
+# Technology/Library: Built-in Python input function.
+# Loading and Managing Embeddings:
+
+# Purpose: Generates embeddings for text chunks and manages their retrieval.
+# Why: Embeddings capture semantic information, enabling similarity calculations and meaningful search results.
+# Technology/Library: Hugging Face Transformers library for pre-trained embeddings.
+# Document Retrieval:
+
+# Purpose: Retrieves relevant documents based on the input query.
+# Why: Provides the necessary context and supporting information for generating accurate answers.
+# Technology/Library: Chroma vectorstore library for efficient document retrieval.
+# Answer Generation:
+
+# Purpose: Generates answers based on the input query and retrieved documents.
+# Why: Delivers relevant and informative answers to user queries.
+# Technology/Library: langchain.llms.GPT4All and langchain.llms.LlamaCpp for generating answers.
+# Streaming Standard Output (StdOut) Callback:
+
+# Purpose: Controls the streaming of standard output during answer generation.
+# Why: Enables real-time feedback and monitoring of the answer generation process.
+# Technology/Library: langchain.callbacks.streaming_stdout.StreamingStdOutCallbackHandler.
+# Configuration and Environment Variables:
+
+# Purpose: Allows customization and configuration of various aspects of the code.
+# Why: Facilitates flexibility and adaptability for different use cases and setups.
+# Technology/Library: os module and dotenv library for managing environment variables.
+# Command-line Interface (CLI) Arguments:
+
+# Purpose: Provides additional options and flags for running the script.
+# Why: Allows users to control various settings and behaviors of the code.
+# Technology/Library: argparse module for parsing command-line arguments.

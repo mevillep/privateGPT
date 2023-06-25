@@ -30,7 +30,7 @@ from constants import CHROMA_SETTINGS
 load_dotenv()
 
 
-# Load environment variables
+#  Load environment variables
 persist_directory = os.environ.get('PERSIST_DIRECTORY')
 source_directory = os.environ.get('SOURCE_DIRECTORY', 'source_documents')
 embeddings_model_name = os.environ.get('EMBEDDINGS_MODEL_NAME')
@@ -50,7 +50,7 @@ class MyElmLoader(UnstructuredEmailLoader):
             except ValueError as e:
                 if 'text/html content not found in email' in str(e):
                     # Try plain text
-                    self.unstructured_kwargs["content_source"]="text/plain"
+                    self.unstructured_kwargs["content_source"] = "text/plain"
                     doc = UnstructuredEmailLoader.load(self)
                 else:
                     raise
@@ -90,6 +90,7 @@ def load_single_document(file_path: str) -> List[Document]:
 
     raise ValueError(f"Unsupported file extension '{ext}'")
 
+
 def load_documents(source_dir: str, ignored_files: List[str] = []) -> List[Document]:
     """
     Loads all documents from the source documents directory, ignoring specified files
@@ -99,7 +100,8 @@ def load_documents(source_dir: str, ignored_files: List[str] = []) -> List[Docum
         all_files.extend(
             glob.glob(os.path.join(source_dir, f"**/*{ext}"), recursive=True)
         )
-    filtered_files = [file_path for file_path in all_files if file_path not in ignored_files]
+    filtered_files = [
+        file_path for file_path in all_files if file_path not in ignored_files]
 
     with Pool(processes=os.cpu_count()) as pool:
         results = []
@@ -109,6 +111,7 @@ def load_documents(source_dir: str, ignored_files: List[str] = []) -> List[Docum
                 pbar.update()
 
     return results
+
 
 def process_documents(ignored_files: List[str] = []) -> List[Document]:
     """
@@ -120,10 +123,13 @@ def process_documents(ignored_files: List[str] = []) -> List[Document]:
         print("No new documents to load")
         exit(0)
     print(f"Loaded {len(documents)} new documents from {source_directory}")
-    text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size=chunk_size, chunk_overlap=chunk_overlap)
     texts = text_splitter.split_documents(documents)
-    print(f"Split into {len(texts)} chunks of text (max. {chunk_size} tokens each)")
+    print(
+        f"Split into {len(texts)} chunks of text (max. {chunk_size} tokens each)")
     return texts
+
 
 def does_vectorstore_exist(persist_directory: str) -> bool:
     """
@@ -131,12 +137,15 @@ def does_vectorstore_exist(persist_directory: str) -> bool:
     """
     if os.path.exists(os.path.join(persist_directory, 'index')):
         if os.path.exists(os.path.join(persist_directory, 'chroma-collections.parquet')) and os.path.exists(os.path.join(persist_directory, 'chroma-embeddings.parquet')):
-            list_index_files = glob.glob(os.path.join(persist_directory, 'index/*.bin'))
-            list_index_files += glob.glob(os.path.join(persist_directory, 'index/*.pkl'))
+            list_index_files = glob.glob(
+                os.path.join(persist_directory, 'index/*.bin'))
+            list_index_files += glob.glob(
+                os.path.join(persist_directory, 'index/*.pkl'))
             # At least 3 documents are needed in a working vectorstore
             if len(list_index_files) > 3:
                 return True
     return False
+
 
 def main():
     # Create embeddings
@@ -145,9 +154,11 @@ def main():
     if does_vectorstore_exist(persist_directory):
         # Update and store locally vectorstore
         print(f"Appending to existing vectorstore at {persist_directory}")
-        db = Chroma(persist_directory=persist_directory, embedding_function=embeddings, client_settings=CHROMA_SETTINGS)
+        db = Chroma(persist_directory=persist_directory,
+                    embedding_function=embeddings, client_settings=CHROMA_SETTINGS)
         collection = db.get()
-        texts = process_documents([metadata['source'] for metadata in collection['metadatas']])
+        texts = process_documents([metadata['source']
+                                  for metadata in collection['metadatas']])
         print(f"Creating embeddings. May take some minutes...")
         db.add_documents(texts)
     else:
@@ -155,7 +166,8 @@ def main():
         print("Creating new vectorstore")
         texts = process_documents()
         print(f"Creating embeddings. May take some minutes...")
-        db = Chroma.from_documents(texts, embeddings, persist_directory=persist_directory, client_settings=CHROMA_SETTINGS)
+        db = Chroma.from_documents(
+            texts, embeddings, persist_directory=persist_directory, client_settings=CHROMA_SETTINGS)
     db.persist()
     db = None
 
@@ -164,3 +176,46 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# Loading Documents:
+
+# Purpose: Load documents from a specified source directory.
+# Why: Enables the ingestion of various types of documents for further processing and embedding.
+# Libraries/Technologies: glob for file matching, os.path for file path manipulation.
+
+# Document Chunking:
+
+# Purpose: Split loaded documents into smaller text chunks.
+# Why: Facilitates efficient processing and embedding by dividing large documents into manageable segments.
+# Libraries/Technologies: Custom text splitter implementation (RecursiveCharacterTextSplitter).
+
+# Embeddings Creation:
+
+# Purpose: Generate embeddings for the text chunks.
+# Why: Embeddings capture semantic information in a numerical representation, enabling similarity calculations and downstream NLP tasks.
+# Libraries/Technologies: Hugging Face Transformers library for pre-trained models, Hugging Face Tokenizers library for text tokenization.
+
+# Vectorstore Management:
+
+# Purpose: Handle the creation and management of a vectorstore using Chroma.
+# Why: Vectorstores provide efficient storage and retrieval of document embeddings, allowing for fast similarity search and content-based document retrieval.
+# Libraries/Technologies: Chroma vectorstore library.
+
+# Persisting Vectorstore:
+
+# Purpose: Store the resulting vectorstore (including document embeddings) to a specified directory.
+# Why: Persistent storage enables reusability and retrieval of embeddings without recomputing them, improving efficiency for subsequent processing tasks.
+# Libraries/Technologies: File system operations using os module.
+
+# Incremental Updates:
+
+# Purpose: Support appending new documents and embeddings to an existing vectorstore.
+# Why: Enables incremental updates to the vectorstore, allowing the inclusion of new documents without reprocessing all existing ones.
+# Libraries/Technologies: Chroma vectorstore library for managing existing vectorstore, glob for file matching.
+
+# Progress Tracking:
+
+# Purpose: Provide a progress bar to track the loading and processing of documents.
+# Why: Offers visual feedback on the progress of ingestion operations, helping monitor and estimate completion times.
+# Libraries/Technologies: tqdm library for displaying progress bars.
